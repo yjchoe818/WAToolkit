@@ -137,6 +137,7 @@ function proxyNotifications(isBackgroundScript)
     {
         window.addEventListener("message", function (event)
         {
+            if (event.origin !== whatsAppUrl) return; // Validate the origin of the message
             if (event != undefined && event.data != undefined && event.data.name == "backgroundNotificationClicked")
             {
                 chrome.runtime.sendMessage({ name: "backgroundNotificationClicked", srcChatTitle: event.data.srcChatTitle });
@@ -147,6 +148,7 @@ function proxyNotifications(isBackgroundScript)
     {
         window.addEventListener("message", function (event)
         {
+            if (event.origin !== whatsAppUrl) return; // Validate the origin of the message
             if (event != undefined && event.data != undefined && (event.data.name == "foregroundNotificationClicked" || event.data.name == "foregroundNotificationShown"))
             {
                 setTimeout(function () { checkBadge(); }, safetyDelayLonger);
@@ -205,13 +207,13 @@ function proxyNotifications(isBackgroundScript)
 
                         if (debug) console.info("WAT: Background notification click intercepted with srcChatTitle " + srcChatTitle);
                     }
-                    window.postMessage({ name: "backgroundNotificationClicked", srcChatTitle: srcChatTitle }, "*");
+                    window.postMessage({ name: "backgroundNotificationClicked", srcChatTitle: srcChatTitle }, whatsAppUrl); // Use specific target origin
                 }
                 else
                 {
                     if (debug) console.info("WAT: Foreground notification click intercepted");
 
-                    window.postMessage({ name: "foregroundNotificationClicked" }, "*");
+                    window.postMessage({ name: "foregroundNotificationClicked" }, whatsAppUrl); // Use specific target origin
                 }
             };
             _notification.onshow = function (event)
@@ -222,7 +224,7 @@ function proxyNotifications(isBackgroundScript)
                 {
                     if (debug) console.info("WAT: Foreground notification show intercepted");
 
-                    window.postMessage({ name: "foregroundNotificationShown" }, "*");
+                    window.postMessage({ name: "foregroundNotificationShown" }, whatsAppUrl); // Use specific target origin
                 }
             };
             _notification.onerror = function (event)
